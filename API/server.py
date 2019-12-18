@@ -9,13 +9,12 @@ class Context:
         self.root = root
         self.lock = lock
 
-    def path(self, file_name):
+    def path(self, file_name=''):
         return self.root / file_name
 
     def save(self, file_name, data):
-        with self.lock:
-            with self.path(file_name).open('w') as f:
-                f.write(data)
+        with self.path(file_name).open('w') as f:
+            f.write(data)
 
 
 def handle_connection(connection, data_dir, lock=threading.Lock()):
