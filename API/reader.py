@@ -1,8 +1,34 @@
 import datetime
+import gzip
 import struct
+
+import cortex_pb2
 
 
 class Reader:
+    def __init__(self, filename):
+        msgs = messages(gzip.open(filename))
+        self.user = protobuf_deserializer(cortex_pb2.User)(next(msgs))
+        self.snapshots = map(protobuf_deserializer(cortex_pb2.Snapshot), msgs)
+
+    def __iter__(self):
+        return iter(self.snapshots)
+
+
+def messages(f):
+    while True:
+        yield f.read(int.from_bytes(f.read(4), 'little', signed=False))
+
+
+def protobuf_deserializer(proto):
+    def deserialize(data):
+        obj = proto()
+        obj.ParseFromString(data)
+        return obj
+    return deserialize
+
+
+class ReaderOld:
     def __repr__(self):
         return '<' + str(self) + '>'
 

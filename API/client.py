@@ -1,4 +1,5 @@
-from datetime import datetime
+import click
+
 from .reader import Reader
 from .utils import Connection, Hello, Config, Snapshot
 
@@ -10,10 +11,16 @@ from .utils import Connection, Hello, Config, Snapshot
 '''
 
 
-def run_client(address, sample):
+def upload_sample(host, port, path):
+    """same as run_client"""
+    run_client(host, port, path)
+
+
+def run_client(host, port, sample):
     """
-    Runs the client connecting to the address given by argument 'address',
-    reading data from file given by sample
+    Runs the client connecting to the address given by arguments 'host', 'port';
+    reading data from file given by sample.
+    sample argument may be either a file object or a path
 
     example:
     >>>sample = open('sample.mind')
@@ -21,8 +28,8 @@ def run_client(address, sample):
     """
     reader = Reader(sample)
     for snapshot in reader:
-        with Connection.connect(*address) as connection:
-            hello_msg = Hello(reader.user_id, reader.username, reader.birthdate, reader.gender)
+        with Connection.connect(host, port) as connection:
+            hello_msg = Hello(reader.user.user_id, reader.user.username, reader.user.birthday, reader.user.gender)
             connection.send_message(hello_msg.serialize())
             config_msg = Config.deserialize(connection.receive_message())
             optional = {'translation':snapshot.translation, 'rotation':snapshot.rotation, 'hunger':snapshot.hunger, 'thirst':snapshot.thirst, 'happiness':snapshot.happiness}
@@ -31,20 +38,22 @@ def run_client(address, sample):
             connection.send_message(snapshot_msg.serialize())
 
 
-def main(argv):
-    if len(argv) != 3:
-        print(f'USAGE: {argv[0]} <address> <thought>')
-        return 1
-    try:
-        address = argv[1].split(':', 1)
-        address[1] = int(address[1])
-        run_client(tuple(address), argv[2])
-        print('done')
-    except Exception as error:
-        print(f'ERROR: {error}')
-        return 1
+def convert(info):
+    """converts data structure given by reader to format matching the protocol with the server"""
+    return info
+
+
+@click.command()
+@click.option('--host', default='localhost', help="Host to connect to")
+@click.option('--port', default=8000, help="Host's port")
+@click.argument('file', type=click.File('rb'), help="File to read from")
+def client(host, port, file):
+    """
+    Runs the client connecting to server at address given by options '--host', '--port';
+    reading data sample from given file argument.
+    """
+    run_client(host, port, file)
 
 
 if __name__ == '__main__':
-    import sys
-    sys.exit(main(sys.argv))
+    client()

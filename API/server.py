@@ -1,3 +1,4 @@
+import click
 import pathlib
 import threading
 from .utils import Listener, Hello, Config, Snapshot
@@ -36,35 +37,28 @@ def handle_connection(connection, data_dir, lock=threading.Lock()):
     parse_color_image(context, snapshot)
 
 
-def run_server(address, data_dir):
+def run_server(host, port, data_dir):
     """
     Runs the server with the given address,
     using directory with path given by argument data_dir.
 
     example:
-    >>> run_server(('127.0.0.1', 8000), 'data/')
+    >>> run_server('127.0.0.1', 8000, 'data/')
     """
-    listener = Listener(address[1], address[0])
+    listener = Listener(host, port)
     listener.start()
     while True:
         client = listener.accept()
         threading.Thread(target=handle_connection, args=(client, data_dir)).start()
 
 
-def main(argv):
-    if len(argv) != 3:
-        print(f'USAGE: {argv[0]} <address> <data_dir>')
-        return 1
-    try:
-        address = argv[1].split(':', 1)
-        address[1] = int(address[1])
-        run_server(tuple(address), argv[2])
-        print('done')
-    except Exception as error:
-        print(f'ERROR: {error}')
-        return 1
+@click.command()
+@click.option('--host', default='localhost')
+@click.option('--port', default=8000, help="Port to listen on")
+@click.argument('url', help="URL to a message queue")
+def server(host, port, url):
+    pass
 
 
 if __name__ == '__main__':
-    import sys
-    sys.exit(main(sys.argv))
+    server()
