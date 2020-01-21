@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from API.utils import Connection
+from ducc.utils import Connection
 
 
 _PORT = 1234

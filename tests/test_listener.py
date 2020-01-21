@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from API.utils import Listener
+from ducc.utils import Listener
 
 
 _PORT = 1234

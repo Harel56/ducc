@@ -2,7 +2,7 @@ import datetime as dt
 import time
 import pytest
 
-from API.utils import protocol
+from ducc.utils import protocol
 
 def test_hello():
     hello = protocol.Hello(3, "Harel Etgar", dt.datetime(2001, 3, 29).timestamp(), 'm')
