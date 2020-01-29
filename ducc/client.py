@@ -46,7 +46,7 @@ def convert(info):
 @click.command()
 @click.option('--host', default='localhost', help="Host to connect to")
 @click.option('--port', default=8000, help="Host's port")
-@click.argument('file', type=click.File('rb'), help="File to read from")
+@click.argument('file', type=click.File('rb'))
 def client(host, port, file):
     """
     Runs the client connecting to server at address given by options '--host', '--port';

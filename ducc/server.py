@@ -18,15 +18,44 @@ class Context:
             f.write(data)
 
 
-def handle_connection(connection, data_dir, lock=threading.Lock()):
-    data_dir = pathlib.Path(data_dir)
+def handle_connection(connection, callback):
     with connection:
         hello = Hello.deserialize(connection.receive_message())
         config = Config('translation', 'color_image')
         connection.send_message(config.serialize())
         snapshot = Snapshot.deserialize(connection.receive_message())
+    callback((hello, snapshot))
+
+
+def run_server(host, port, publish):
+    """
+    Runs the server with the given address,
+    using publish as callback giving it the received messages.
+
+    example:
+    >>> run_server('127.0.0.1', 8000, print)
+    """
+    listener = Listener(host, port)
+    listener.start()
+    while True:
+        client = listener.accept()
+        threading.Thread(target=handle_connection, args=(client, publish)).start()
+
+
+def publisher(publish):
+    """Decorator"""
+    def decorator(*args, **kwargs):
+        def wrapper(msg):
+            return publish(msg, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+@publisher
+def publish_to_data_dir(message, data_dir, lock=threading.Lock()):
+    user, snapshot = message
     dt = snapshot.datetime()
-    user_dir = data_dir / str(hello.user_id)
+    user_dir = data_dir / str(user.user_id)
     dir_path = user_dir / ("%04d-%02d-%02d_%02d-%02d-%02d-%06d" % (
         dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond))
     with lock:
@@ -37,25 +66,14 @@ def handle_connection(connection, data_dir, lock=threading.Lock()):
     parse_color_image(context, snapshot)
 
 
-def run_server(host, port, data_dir):
-    """
-    Runs the server with the given address,
-    using directory with path given by argument data_dir.
-
-    example:
-    >>> run_server('127.0.0.1', 8000, 'data/')
-    """
-    listener = Listener(host, port)
-    listener.start()
-    while True:
-        client = listener.accept()
-        threading.Thread(target=handle_connection, args=(client, data_dir)).start()
+def publish_to_queue():
+    pass
 
 
 @click.command()
 @click.option('--host', default='localhost')
 @click.option('--port', default=8000, help="Port to listen on")
-@click.argument('url', help="URL to a message queue")
+@click.argument('url')
 def server(host, port, url):
     pass
 
