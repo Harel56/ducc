@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ user.name }}</title>
+</head>
+<body>
+<h1>{{ user.name }}</h1>
+<h2>Snapshots</h2>
+<ul>
+    {% for snapshot in snapshots %}
+    <li><a href="/users/{{ user.id }}/snapshots/{{ snapshot._id }}">{{snapshot.time}}</a></li>
+    {% endfor %}
+</ul>
+</body>
+</html>

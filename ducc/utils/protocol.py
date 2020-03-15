@@ -100,10 +100,10 @@ class Snapshot:
     def deserialize(cls, data):
         timestamp, tx, ty, tz, rx, ry, rz, rw, h, w = struct.unpack('QdddddddII', data[:72])
         location = 72 + 3 * w * h
-        color = (w, h, data[72:location])
+        color = w, h, data[72:location]
         location2 = 8 + location
         h, w = struct.unpack('II', data[location:location2])
         location = 4 * w * h + location2
-        depth = (w, h, data[location2:location])
+        depth = w, h, data[location2:location]
         feelings = struct.unpack('ffff', data[location:location + 16])
         return cls(timestamp, color, depth, (tx, ty, tz), (rx, ry, rz, rw), *feelings)

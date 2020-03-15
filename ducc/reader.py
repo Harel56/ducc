@@ -2,7 +2,7 @@ import datetime
 import gzip
 import struct
 
-import cortex_pb2
+from . import cortex_pb2
 
 
 class Reader:

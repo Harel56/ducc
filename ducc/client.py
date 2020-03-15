@@ -1,7 +1,6 @@
 import click
-
 from .reader import Reader
-from .utils import Connection, Hello, Config, Snapshot
+from .utils import Connection, Hello, Config
 
 
 '''def upload_thought(address, user_id, thought):
@@ -24,28 +23,25 @@ def run_client(host, port, sample):
 
     example:
     >>>sample = open('sample.mind')
-    >>>run_client(('127.0.0.1', 8000), sample)
+    >>>run_client(('localhost', 8000), sample)
     """
     reader = Reader(sample)
     for snapshot in reader:
         with Connection.connect(host, port) as connection:
-            hello_msg = Hello(reader.user.user_id, reader.user.username, reader.user.birthday, reader.user.gender)
-            connection.send_message(hello_msg.serialize())
+            hello_msg, snapshot_msg = convert(reader.user, snapshot)
+            connection.send_message(hello_msg)
             config_msg = Config.deserialize(connection.receive_message())
-            optional = {'translation':snapshot.translation, 'rotation':snapshot.rotation, 'hunger':snapshot.hunger, 'thirst':snapshot.thirst, 'happiness':snapshot.happiness}
-            snapshot_msg = Snapshot(snapshot.timestamp, snapshot.color, snapshot.depth,
-                                    **{key: value for (key, value) in optional.items() if (key in config_msg.fields)})
-            connection.send_message(snapshot_msg.serialize())
+            connection.send_message(snapshot_msg)
 
 
-def convert(info):
+def convert(user, snapshot):
     """converts data structure given by reader to format matching the protocol with the server"""
-    return info
+    return Hello(user.user_id, user.username, user.birthday, "mfo"[user.gender]).serialize(), snapshot.SerializeToString()
 
 
 @click.command()
-@click.option('--host', default='localhost', help="Host to connect to")
-@click.option('--port', default=8000, help="Host's port")
+@click.option('-h', '--host', default='localhost', help="Host to connect to")
+@click.option('-p', '--port', default=8000, help="Host's port")
 @click.argument('file', type=click.File('rb'))
 def client(host, port, file):
     """
