@@ -10,7 +10,7 @@ def cli():
 @cli.command()
 @click.option('-h', '--host', default='localhost')
 @click.option('-p', '--port', default=8080)
-@click.option('-d', '--database')
+@click.option('-d', '--database', default='mongodb://localhost:27017/')
 def run_server(host, port, database):
     start(host, port, database)
 

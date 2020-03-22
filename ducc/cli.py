@@ -27,7 +27,7 @@ def read(limit, filename):
 
 @cli.command('get-users')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-p', '--port', default=5000, help="Port to listen on")
 def get_users(host, port):
     response = requests.get(f'http://{host}:{port}/users')
     click.echo(response.json())
@@ -35,7 +35,7 @@ def get_users(host, port):
 
 @cli.command('get-user')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-p', '--port', default=5000, help="Port to listen on")
 @click.argument('user-id', type=click.INT)
 def get_user(host, port, user_id):
     response = requests.get(f'http://{host}:{port}/users/{user_id}')
@@ -44,7 +44,7 @@ def get_user(host, port, user_id):
 
 @cli.command('get-snapshots')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-p', '--port', default=5000, help="Port to listen on")
 @click.argument('user-id', type=click.INT)
 def get_snapshots(host, port, user_id):
     response = requests.get(f'http://{host}:{port}/users/{user_id}/snapshots')
@@ -53,7 +53,7 @@ def get_snapshots(host, port, user_id):
 
 @cli.command('get-snapshot')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-p', '--port', default=5000, help="Port to listen on")
 @click.argument('user-id', type=click.INT)
 @click.argument('snapshot-id', type=click.INT)
 def get_snapshot(host, port, user_id, snapshot_id):
@@ -63,7 +63,7 @@ def get_snapshot(host, port, user_id, snapshot_id):
 
 @cli.command('get-result')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-p', '--port', default=5000, help="Port to listen on")
 @click.option('-s', '--save', type=click.File('w'), help="file to save result's data to")
 @click.argument('user-id', type=click.INT)
 @click.argument('snapshot-id', type=click.INT)

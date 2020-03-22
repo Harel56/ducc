@@ -15,4 +15,4 @@ def parse_color_image(data):
     d["snapshot"]["color"][2] += IMAGE_FORMAT
     image.save(d["snapshot"]["color"][2])
     return json.dumps({"user": d["user"], "timestamp": d["snapshot"]["timestamp"],
-                       "color": (d["snapshot"]["color"][2])})
+                       "color": d["snapshot"]["color"]})

@@ -25,7 +25,7 @@ class Context:
 def handle_connection(connection, callback):
     with connection:
         hello = Hello.deserialize(connection.receive_message())
-        config = Config('translation', 'color_image')
+        config = Config('pose', 'color_image', 'depth_image', 'feelings')
         connection.send_message(config.serialize())
         #snapshot = Snapshot.deserialize(connection.receive_message())
         snapshot = cortex_pb2.Snapshot()
@@ -90,27 +90,34 @@ def publish_to_queue(host, port, data_dir):
     channel.exchange_declare(exchange='root', exchange_type='fanout')
 
     def publish(message):
-        color_path, depth_path = save_binary_data_to_filesystem(message, data_dir)
-        message = json.dumps({"user": {"id": message[0].user_id, "name": message[0].username,
-                                       "birthday": message[0].birthdate, "gender": message[0].gender},
-                              "snapshot": {"timestamp": message[1].datetime,
-                                           "translation": (message[1].pose.translation.x, message[1].pose.translation.y,
-                                                           message[1].pose.translation.z),
-                                           "rotation": (message[1].pose.rotation.x, message[1].pose.rotation.y,
-                                                        message[1].pose.rotation.z, message[1].pose.rotation.w),
-                                           "color":
-                                               (message[1].color_image.width, message[1].color_image.height, color_path),
-                                           "depth":
-                                               (message[1].depth_image.width, message[1].depth_image.height, depth_path),
-                                           "feelings": {"hunger": message[1].feelings.hunger,
-                                                        "thirst": message[1].feelings.thirst,
-                                                        "exhaustion": message[1].feelings.exhaustion,
-                                                        "happiness": message[1].feelings.happiness}}})
+        paths = save_binary_data_to_filesystem(message, data_dir)
+        message = build_message(message, *paths)
         return channel.basic_publish(exchange='root', routing_key='', body=message)
     return publish
 
 
-@click.command()
+def build_message(message, color_path, depth_path):
+    return json.dumps({"user": {"id": message[0].user_id, "name": message[0].username,
+                                "birthday": message[0].birthdate, "gender": message[0].gender},
+                       "snapshot": {"timestamp": message[1].datetime,
+                                    "translation": (message[1].pose.translation.x, message[1].pose.translation.y,
+                                                    message[1].pose.translation.z),
+                                    "rotation": (message[1].pose.rotation.x, message[1].pose.rotation.y,
+                                                 message[1].pose.rotation.z, message[1].pose.rotation.w),
+                                    "color": (message[1].color_image.width, message[1].color_image.height, color_path),
+                                    "depth": (message[1].depth_image.width, message[1].depth_image.height, depth_path),
+                                    "feelings": {"hunger": message[1].feelings.hunger,
+                                                 "thirst": message[1].feelings.thirst,
+                                                 "exhaustion": message[1].feelings.exhaustion,
+                                                 "happiness": message[1].feelings.happiness}}})
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.option('-h', '--host', default='localhost')
 @click.option('-p', '--port', default=8000, help="Port to listen on")
 @click.argument('url')
@@ -126,4 +133,4 @@ def server(host, port, url):
 
 
 if __name__ == '__main__':
-    server()
+    cli()

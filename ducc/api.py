@@ -69,13 +69,18 @@ def run_api_server(host, port, database_url):
     app.run(host, port)
 
 
-@click.command('run-server')
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('run-server')
 @click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000)
+@click.option('-p', '--port', default=5000)
 @click.option('-d', '--database', default='mongodb://localhost:27017/')
 def run_server(host, port, database):
     run_api_server(host, port, database)
 
 
 if __name__ == "__main__":
-    run_server()
+    cli()

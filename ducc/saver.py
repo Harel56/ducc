@@ -38,6 +38,29 @@ class Saver:
             pass  # Unsupported scheme / database
 
 
+def run_server_pika(host: str, port: int, database: str):
+    channel, queue_name = pika_connection_establish(host, port)
+
+    saver = Saver(database)
+
+    def callback(ch, method, properties, body):
+        saver.save(method.routing_key, body)
+
+    # Waiting for logs
+    channel.basic_consume(queue=queue_name, on_message_callback=callback)
+    channel.start_consuming()
+
+
+def pika_connection_establish(host, port):
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
+    channel = connection.channel()
+    channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
+    result = channel.queue_declare(queue='', exclusive=True)
+    queue_name = result.method.queue
+    channel.queue_bind(exchange='topic_logs', queue=queue_name, routing_key='#')
+    return channel, queue_name
+
+
 @click.group()
 def cli():
     pass
@@ -57,21 +80,7 @@ def save(database, topic, data):
 def run_saver(database, queue):
     o = urlparse(queue, scheme="rabbitmq")
     if o.scheme == 'rabbitmq':
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=o.hostname, port=o.port))
-        channel = connection.channel()
-        channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
-        result = channel.queue_declare(queue='', exclusive=True)
-        queue_name = result.method.queue
-        channel.queue_bind(exchange='topic_logs', queue=queue_name, routing_key='#')
-
-        saver = Saver(database)
-
-        def callback(ch, method, properties, body):
-            saver.save(method.routing_key, body)
-
-        # Waiting for logs
-        channel.basic_consume(queue=queue_name, on_message_callback=callback)
-        channel.start_consuming()
+        run_server_pika(o.hostname, o.port, database)
     else:
         # Scheme not supported
         click.echo("USAGE")
