@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ user.name }}</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}{{ user.name }}{% endblock %}
+{% block body %}
 <h1>{{ user.name }}</h1>
-<ul>
-    <li>id: {{ user.id}}</li>
-    <li>name: {{ user.name }}</li>
-    <li>birthday: {{ birth }}</li>
-    <li>gender: {{ user.gender}}</li>
-    <li><a href="/users/{{ user.id }}/snapshots">snapshots</a></li>
+<ul class="list-group">
+    <li class="list-group-item">id: {{ user.id}}</li>
+    <li class="list-group-item">name: {{ user.name }}</li>
+    <li class="list-group-item">birthday: {{ birth }}</li>
+    <li class="list-group-item">gender: {{ user.gender}}</li>
 </ul>
-</body>
-</html>
+<a href="/users/{{ user.id }}/snapshots" class="btn btn-primary btn-block">snapshots</a>
+{% endblock %}

@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Users</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block body %}
 <h1>Users</h1>
 {% for user in users %}
 <div>
     <h2>{{ user.name }}</h2>
-    <a href="/users/{{ user.id }}">credentials</a>   <a href="/users/{{ user.id }}/snapshots">snapshots</a>
+    <div class="list-group list-group-horizontal">
+        <a href="/users/{{ user.id }}" class="list-group-item list-group-item-action">credentials</a>
+        <a href="/users/{{ user.id }}/snapshots" class="list-group-item list-group-item-action">snapshots</a>
+    </div>
 </div>
 {% endfor %}
-</body>
-</html>
+{% endblock %}

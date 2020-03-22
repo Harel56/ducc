@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ user.name }}</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}{{ user.name }}{% endblock %}
+{% block body %}
 <h1>{{ user.name }}</h1>
 <h2>Snapshots</h2>
-<ul>
+<div class="list-group">
     {% for snapshot in snapshots %}
-    <li><a href="/users/{{ user.id }}/snapshots/{{ snapshot._id }}">{{snapshot.time}}</a></li>
+    <a href="/users/{{ user.id }}/snapshots/{{ snapshot._id }}" class="list-group-item list-group-item-action">{{snapshot.time}}</a>
     {% endfor %}
-</ul>
-</body>
-</html>
+</div>
+{% endblock %}

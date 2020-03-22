@@ -47,15 +47,19 @@ def depth(userID: int, snapshotID):
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/next')
 def next(userID: int, snapshotID):
     og = client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})
-    found = min((i for i in client.db.snapshots.find({'user_id': userID}) if og['time'] < i['time']), default=og)
+    found = min((i for i in client.db.snapshots.find({'user_id': userID}) if (og['time'] < i['time'])), key=time_key, default=og)
     return flask.redirect(flask.url_for('snapshot', userID=found['user_id'], snapshotID=found['_id']))
 
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/prev')
 def prev(userID: int, snapshotID):
     og = client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})
-    found = max((i for i in client.db.snapshots.find({'user_id': userID}) if og['time'] > i['time']), default=og)
+    found = max((i for i in client.db.snapshots.find({'user_id': userID}) if (og['time'] > i['time'])), key=time_key, default=og)
     return flask.redirect(flask.url_for('snapshot', userID=found['user_id'], snapshotID=found['_id']))
+
+
+def time_key(d: dict):
+    return d['time']
 
 
 def run_server(host, port, database_url):

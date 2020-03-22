@@ -52,7 +52,7 @@ def save(database, topic, data):
 
 
 @cli.command()
-@click.argument('database', help="url for the database")
+@click.argument('database')
 @click.argument('queue')
 def run_saver(database, queue):
     o = urlparse(queue, scheme="rabbitmq")

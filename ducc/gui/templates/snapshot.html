@@ -1,28 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Snapshot</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Snapshot{% endblock %}
+{% block body %}
 <h1>Snapshot</h1>
-<table class="menu"><tbody><tr><td><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/prev">Previous snapshot</a></td><td><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/next">Next snapshot</a></td></tr></tbody></table>
+<nav class="nav"><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/prev" class="nav-link">Previous snapshot</a><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/next" class="nav-link">Next snapshot</a></nav>
 <h3>Time: {{ snapshot.time }}</h3>
 {% if "pose" in snapshot.topics %}
 <div><h2>Pose</h2>
-<table><tbody>
-<tr><th>translation</th><td>x: {{ snapshot.pose.translation[0] }}</td><td>y: {{ snapshot.pose.translation[1] }}</td><td>z: {{ snapshot.pose.translation[2] }}</td></tr>
-<tr><th>rotation</th><td>x: {{ snapshot.pose.rotation[0] }}</td><td>y: {{ snapshot.pose.rotation[1] }}</td><td>z: {{ snapshot.pose.rotation[2] }}</td><td>w: {{ snapshot.pose.rotation[3] }}</td></tr>
+<table class="table"><tbody>
+<tr><th scope="row">translation</th><td>x: {{ snapshot.pose.translation[0] }}</td><td>y: {{ snapshot.pose.translation[1] }}</td><td>z: {{ snapshot.pose.translation[2] }}</td></tr>
+<tr><th scope="row">rotation</th><td>x: {{ snapshot.pose.rotation[0] }}</td><td>y: {{ snapshot.pose.rotation[1] }}</td><td>z: {{ snapshot.pose.rotation[2] }}</td><td>w: {{ snapshot.pose.rotation[3] }}</td></tr>
 </tbody></table>
 </div>
 {% endif %}
 {% if "feelings" in snapshot.topics %}
 <div><h2>Feelings</h2>
-<table><tbody>
-<tr><th>Hunger:</th><td>{{ snapshot.feelings.hunger }}</td></tr>
-<tr><th>Thirst:</th><td>{{ snapshot.feelings.thirst }}</td></tr>
-<tr><th>Exhaustion:</th><td>{{ snapshot.feelings.exhaustion }}</td></tr>
-<tr><th>Happiness:</th><td>{{ snapshot.feelings.happiness }}</td></tr>
+<table class="table"><thead>
+<tr><th scope="col">Hunger:</th><th scope="col">Thirst:</th><th scope="col">Exhaustion:</th><th scope="col">Happiness:</th></tr>
+</thead><tbody>
+<tr><td>{{ snapshot.feelings.hunger }}</td>
+<td>{{ snapshot.feelings.thirst }}</td>
+<td>{{ snapshot.feelings.exhaustion }}</td>
+<td>{{ snapshot.feelings.happiness }}</td></tr>
 </tbody></table>
 </div>
 {% endif %}
@@ -34,6 +32,5 @@
 <h2>Depth Image</h2>
 <img src="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/depth">
 {% endif %}
-<table class="menu"><tbody><tr><td><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/prev">Previous snapshot</a></td><td><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/next">Next snapshot</a></td></tr></tbody></table>
-</body>
-</html>
+<nav class="nav"><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/prev" class="nav-link">Previous snapshot</a><a href="/users/{{ snapshot.user_id }}/snapshots/{{ snapshot._id }}/next" class="nav-link">Next snapshot</a></nav>
+{% endblock %}
