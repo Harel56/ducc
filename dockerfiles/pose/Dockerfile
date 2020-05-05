@@ -3,4 +3,4 @@ ADD ducc /ducc/
 ADD requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
-CMD ["python", "-m", "ducc.api", "run-server"]
+CMD ["python", "-m", "ducc.parsers", "run-parser", "pose", "rabbitmq://localhost:5672/"]

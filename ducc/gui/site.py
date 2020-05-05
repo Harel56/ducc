@@ -36,12 +36,12 @@ def snapshot(userID: int, snapshotID):
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/color')
 def color(userID: int, snapshotID):
-    return flask.send_file(client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})['color'])
+    return flask.send_file(client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})['color'][2])
 
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/depth')
 def depth(userID: int, snapshotID):
-    return flask.send_file(client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})['depth'])
+    return flask.send_file(client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})['depth'][2])
 
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/next')
@@ -56,6 +56,11 @@ def prev(userID: int, snapshotID):
     og = client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID})
     found = max((i for i in client.db.snapshots.find({'user_id': userID}) if (og['time'] > i['time'])), key=time_key, default=og)
     return flask.redirect(flask.url_for('snapshot', userID=found['user_id'], snapshotID=found['_id']))
+
+
+@app.route('/')
+def home():
+    return flask.redirect(flask.url_for('users'))
 
 
 def time_key(d: dict):

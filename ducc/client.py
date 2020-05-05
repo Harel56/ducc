@@ -39,7 +39,12 @@ def convert(user, snapshot):
     return Hello(user.user_id, user.username, user.birthday, "mfo"[user.gender]).serialize(), snapshot.SerializeToString()
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('upload-sample')
 @click.option('-h', '--host', default='localhost', help="Host to connect to")
 @click.option('-p', '--port', default=8000, help="Host's port")
 @click.argument('file', type=click.File('rb'))
@@ -52,4 +57,4 @@ def client(host, port, file):
 
 
 if __name__ == '__main__':
-    client()
+    cli()

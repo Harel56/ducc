@@ -84,16 +84,15 @@ def save_binary_data_to_filesystem(message, data_dir, lock=threading.Lock()):
     return str(color.absolute()), str(depth.absolute())
 
 
-def publish_to_queue(host, port, data_dir):
+@publisher
+def publish_to_queue(message, host, port, data_dir):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
     channel = connection.channel()
     channel.exchange_declare(exchange='root', exchange_type='fanout')
-
-    def publish(message):
-        paths = save_binary_data_to_filesystem(message, data_dir)
-        message = build_message(message, *paths)
-        return channel.basic_publish(exchange='root', routing_key='', body=message)
-    return publish
+    paths = save_binary_data_to_filesystem(message, data_dir)
+    message = build_message(message, *paths)
+    channel.basic_publish(exchange='root', routing_key='', body=message)
+    connection.close()
 
 
 def build_message(message, color_path, depth_path):
@@ -117,19 +116,25 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command('run-server')
 @click.option('-h', '--host', default='localhost')
 @click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-d', '--data-dir', type=click.Path(file_okay=False), default="data_dir/", help="Path to directory to "
+                                                                                              "store binary data of "
+                                                                                              "snapshots")
 @click.argument('url')
-def server(host, port, url):
+def server(host, port, data_dir, url):
+    """Runs the server listening on the given host and port or defaults to localhost:8000 if not provided
+    Publishes the data given to a message queue with url from the argument url.
+    Example for url is 'rabbitmq://localhost:5672'."""
+    data_dir = pathlib.Path(data_dir)
     o = urlparse(url, scheme="rabbitmq")
     if o.scheme == 'rabbitmq':
-        data_dir = pathlib.Path("data_dir/")
         data_dir.mkdir(exist_ok=True)
         run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir))
     else:
         # Scheme not supported
-        click.echo("USAGE")
+        raise click.BadParameter('Unsupported Scheme for the queue url', param='url')
 
 
 if __name__ == '__main__':

@@ -14,6 +14,11 @@ def users():
     return str(list(client.db.users.find({}, {'id': 1, 'name': 1})))
 
 
+@app.route('/')
+def home():
+    return flask.redirect(flask.url_for('users'))
+
+
 @app.route('/users/<int:userID>')
 def user_details(userID: int):
     return str(client.db.users.find_one({'id': userID}))

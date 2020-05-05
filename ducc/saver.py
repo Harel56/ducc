@@ -39,10 +39,8 @@ class Saver:
 
 
 def run_server_pika(host: str, port: int, database: str):
-    channel, queue_name = pika_connection_establish(host, port)
-
     saver = Saver(database)
-
+    channel, queue_name = pika_connection_establish(host, port)
     def callback(ch, method, properties, body):
         saver.save(method.routing_key, body)
 

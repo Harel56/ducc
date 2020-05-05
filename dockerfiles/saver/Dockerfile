@@ -3,4 +3,4 @@ ADD ducc /ducc/
 ADD requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
-CMD ["python", "-m", "ducc.parsers", "pose", "rabbitmq://localhost:5672/"]
+CMD ["python", "-m", "ducc.saver", "run-saver", "mongodb://localhost:27017/", "rabbitmq://localhost:5672/"]
