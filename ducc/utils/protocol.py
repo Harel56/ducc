@@ -12,7 +12,7 @@ class Hello:
     def __eq__(self, other):
         if not isinstance(other, Hello):
             return NotImplemented
-        return self.user_id == other.user_id and self.username == other.user_id \
+        return self.user_id == other.user_id and self.username == other.username \
             and self.birthdate == other.birthdate and self.gender == other.gender
 
     def serialize(self):
@@ -34,6 +34,11 @@ class Config:
 
     def __len__(self):
         return len(self.fields)
+
+    def __eq__(self, other):
+        if not isinstance(other, Config):
+            return NotImplemented
+        return self.fields == other.fields
 
     def encode_fields(self):
         for field in self.fields:
@@ -70,7 +75,8 @@ class Feelings:
     def __eq__(self, other):
         if not isinstance(other, Feelings):
             return NotImplemented
-        return self.hunger == other.hunger and self.thirst == other.thirst and self.exhaustion == other.exhaustion and self.happiness == other.happiness
+        return self.hunger == other.hunger and self.thirst == other.thirst and \
+               self.exhaustion == other.exhaustion and self.happiness == other.happiness
 
     def __hash__(self):
         return hash(tuple(self))

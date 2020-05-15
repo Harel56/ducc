@@ -1,6 +1,7 @@
 import click
+import itertools
 from .reader import Reader
-from .utils import Connection, Hello, Config
+from .utils import Connection, protocol
 
 
 '''def upload_thought(address, user_id, thought):
@@ -10,12 +11,12 @@ from .utils import Connection, Hello, Config
 '''
 
 
-def upload_sample(host, port, path):
+def upload_sample(host, port, path, limit=None):
     """same as run_client"""
-    run_client(host, port, path)
+    run_client(host, port, path, limit)
 
 
-def run_client(host, port, sample):
+def run_client(host, port, sample, limit=None):
     """
     Runs the client connecting to the address given by arguments 'host', 'port';
     reading data from file given by sample.
@@ -23,20 +24,21 @@ def run_client(host, port, sample):
 
     example:
     >>>sample = open('sample.mind')
-    >>>run_client(('localhost', 8000), sample)
+    >>>run_client('localhost', 8000, sample)
     """
     reader = Reader(sample)
-    for snapshot in reader:
+    for snapshot in itertools.islice(reader, limit):
         with Connection.connect(host, port) as connection:
             hello_msg, snapshot_msg = convert(reader.user, snapshot)
             connection.send_message(hello_msg)
-            config_msg = Config.deserialize(connection.receive_message())
+            _ = protocol.Config.deserialize(connection.receive_message())
             connection.send_message(snapshot_msg)
 
 
 def convert(user, snapshot):
     """converts data structure given by reader to format matching the protocol with the server"""
-    return Hello(user.user_id, user.username, user.birthday, "mfo"[user.gender]).serialize(), snapshot.SerializeToString()
+    return protocol.Hello(user.user_id, user.username, user.birthday, "mfo"[user.gender]).serialize(), \
+           snapshot.SerializeToString()
 
 
 @click.group()
@@ -45,15 +47,17 @@ def cli():
 
 
 @cli.command('upload-sample')
-@click.option('-h', '--host', default='localhost', help="Host to connect to")
-@click.option('-p', '--port', default=8000, help="Host's port")
+@click.option('-h', '--host', default='localhost', show_default=True, help="Host to connect to")
+@click.option('-p', '--port', type=click.IntRange(0, 0xffff), default=8000, show_default=True, help="Host's port")
+@click.option('-l', '--limit', type=click.IntRange(0), help="optional limit to the amount of snapshots to read and "
+                                                            "upload")
 @click.argument('file', type=click.File('rb'))
-def client(host, port, file):
+def client(host, port, limit, file):
     """
     Runs the client connecting to server at address given by options '--host', '--port';
     reading data sample from given file argument.
     """
-    run_client(host, port, file)
+    run_client(host, port, file, limit)
 
 
 if __name__ == '__main__':

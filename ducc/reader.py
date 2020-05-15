@@ -16,8 +16,17 @@ class Reader:
 
 
 def messages(f):
-    while True:
-        yield f.read(int.from_bytes(f.read(4), 'little', signed=False))
+    try:
+        while True:
+            size = f.read(4)
+            if len(size) != 4:
+                break
+            res = f.read(int.from_bytes(size, 'little', signed=False))
+            if len(res) != int.from_bytes(size, 'little', signed=False):
+                break
+            yield res
+    finally:
+        f.close()
 
 
 def protobuf_deserializer(proto):
@@ -39,7 +48,7 @@ class ReaderOld:
         return iter(self.snapshots)
 
     def __init__(self, f):
-        uint = lambda size: int.from_bytes(f.read(size), 'little', signed=False)
+        def uint(size): return int.from_bytes(f.read(size), 'little', signed=False)
         self.user_id = uint(8)
         self.username = f.read(uint(4)).decode()
         self.birthdate = uint(4)

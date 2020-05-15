@@ -1,15 +1,7 @@
 import click
-import pika
 from urllib.parse import urlparse
-from .api import run_parser
-
-
-def publish(name, body, conn_params):
-    connection = pika.BlockingConnection(conn_params)
-    channel = connection.channel()
-    channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
-    channel.basic_publish(exchange='topic_logs', routing_key=name, body=run_parser(name, body))
-    connection.close()
+from .api import run_parser, parsers
+from ..utils import queue
 
 
 @click.group()
@@ -18,38 +10,32 @@ def cli():
 
 
 @cli.command()
-@click.argument('name')
+@click.argument('name', type=click.Choice(tuple(parsers.keys())))
 @click.argument('data', type=click.File())
 def parse(name, data):
+    """
+    Accepts a parser name and a path to some raw data, as consumed from the message queue,
+    and prints the results as published to the message queue
+    """
     click.echo(run_parser(name, data.read()))
 
 
 @cli.command('run-parser')
-@click.argument('name')
+@click.argument('name', type=click.Choice(tuple(parsers.keys())))
 @click.argument('url')
 def cli_run_parser(name, url):
+    """
+    Accepts a parser name and url for the message queue.
+    Runs the parser as a service, working with the message queue indefinitely.
+    """
     o = urlparse(url, scheme="rabbitmq")
     if o.scheme == 'rabbitmq':
-        connection_params = pika.ConnectionParameters(host=o.hostname, port=o.port)
-        connection = pika.BlockingConnection()
-        channel = connection.channel()
-        channel.exchange_declare(exchange='root', exchange_type='fanout')
-        result = channel.queue_declare(queue='', exclusive=True)
-        queue_name = result.method.queue
-        channel.queue_bind(exchange='root', queue=queue_name)
-
-        #channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
-
         def callback(ch, method, properties, body):
-            publish(name, body, connection_params)
-            #channel.basic_publish(exchange='topic_logs', routing_key=name, body=run_parser(name, body))
-
-        # Waiting for logs
-        channel.basic_consume(queue=queue_name, on_message_callback=callback)
-        channel.start_consuming()
+            return queue.publish(o.hostname, o.port, 'topic_logs', run_parser(name, body), 'topic', name)
+        queue.consume(o.hostname, o.port, 'root', callback, 'fanout')
     else:
         # Scheme not supported
-        raise click.BadParameter("Unsupported scheme for the message queue url", param='url')
+        raise click.UsageError("Unsupported scheme for the message queue url")
 
 
 cli()

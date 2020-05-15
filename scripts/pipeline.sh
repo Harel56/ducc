@@ -11,3 +11,5 @@ python -m ducc.parsers run-parser color rabbitmq://localhost:5672/ &
 python -m ducc.parsers run-parser depth rabbitmq://localhost:5672/ &
 python -m ducc.saver run-saver mongodb://localhost:27017/ rabbitmq://localhost:5672/ &
 python -m ducc.server run-server rabbitmq://localhost:5672/ &
+python -m ducc.api run-server &
+python -m ducc.gui run-server &

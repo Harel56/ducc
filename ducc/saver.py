@@ -1,9 +1,9 @@
 import click
 import datetime as dt
 import json
-import pika
 import pymongo
 from urllib.parse import urlparse
+from .utils import queue
 
 
 class Saver:
@@ -40,23 +40,21 @@ class Saver:
 
 def run_server_pika(host: str, port: int, database: str):
     saver = Saver(database)
-    channel, queue_name = pika_connection_establish(host, port)
+
     def callback(ch, method, properties, body):
         saver.save(method.routing_key, body)
 
-    # Waiting for logs
-    channel.basic_consume(queue=queue_name, on_message_callback=callback)
-    channel.start_consuming()
+    queue.consume(host, port, 'topic_logs', callback, 'topic', routing_key='#')
 
 
-def pika_connection_establish(host, port):
+'''def pika_connection_establish(host, port):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
     channel = connection.channel()
     channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
     result = channel.queue_declare(queue='', exclusive=True)
     queue_name = result.method.queue
     channel.queue_bind(exchange='topic_logs', queue=queue_name, routing_key='#')
-    return channel, queue_name
+    return channel, queue_name'''
 
 
 @click.group()
@@ -81,7 +79,7 @@ def run_saver(database, queue):
         run_server_pika(o.hostname, o.port, database)
     else:
         # Scheme not supported
-        click.echo("USAGE")
+        raise click.UsageError('Unsupported Scheme for the queue url')
 
 
 if __name__ == "__main__":

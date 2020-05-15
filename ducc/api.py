@@ -80,9 +80,9 @@ def cli():
 
 
 @cli.command('run-server')
-@click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=5000)
-@click.option('-d', '--database', default='mongodb://localhost:27017/')
+@click.option('-h', '--host', default='localhost', show_default=True)
+@click.option('-p', '--port', default=5000, show_default=True, help="Port to listen on")
+@click.option('-d', '--database', default='mongodb://localhost:27017/', show_default=True, help="url for the database")
 def run_server(host, port, database):
     run_api_server(host, port, database)
 

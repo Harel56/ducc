@@ -1,12 +1,11 @@
 import click
 import json
 import pathlib
-import pika
 import struct
 import threading
 from urllib.parse import urlparse
 from . import cortex_pb2
-from .utils import Listener, Hello, Config
+from .utils import Listener, protocol, queue
 
 
 class Context:
@@ -24,8 +23,8 @@ class Context:
 
 def handle_connection(connection, callback):
     with connection:
-        hello = Hello.deserialize(connection.receive_message())
-        config = Config('pose', 'color_image', 'depth_image', 'feelings')
+        hello = protocol.Hello.deserialize(connection.receive_message())
+        config = protocol.Config('pose', 'color_image', 'depth_image', 'feelings')
         connection.send_message(config.serialize())
         #snapshot = Snapshot.deserialize(connection.receive_message())
         snapshot = cortex_pb2.Snapshot()
@@ -35,17 +34,18 @@ def handle_connection(connection, callback):
 
 def run_server(host, port, publish):
     """
+    Listen on host:port and pass received messages to publish
+
     Runs the server with the given address,
     using publish as callback giving it the received messages.
 
     example:
     >>> run_server('127.0.0.1', 8000, print)
     """
-    listener = Listener(port, host)
-    listener.start()
-    while True:
-        client = listener.accept()
-        threading.Thread(target=handle_connection, args=(client, publish)).start()
+    with Listener(port, host) as listener:
+        while True:
+            client = listener.accept()
+            threading.Thread(target=handle_connection, args=(client, publish)).start()
 
 
 def publisher(publish):
@@ -86,13 +86,9 @@ def save_binary_data_to_filesystem(message, data_dir, lock=threading.Lock()):
 
 @publisher
 def publish_to_queue(message, host, port, data_dir):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
-    channel = connection.channel()
-    channel.exchange_declare(exchange='root', exchange_type='fanout')
     paths = save_binary_data_to_filesystem(message, data_dir)
     message = build_message(message, *paths)
-    channel.basic_publish(exchange='root', routing_key='', body=message)
-    connection.close()
+    queue.publish(host, port, 'root', message, 'fanout')
 
 
 def build_message(message, color_path, depth_path):
@@ -117,8 +113,8 @@ def cli():
 
 
 @cli.command('run-server')
-@click.option('-h', '--host', default='localhost')
-@click.option('-p', '--port', default=8000, help="Port to listen on")
+@click.option('-h', '--host', default='localhost', show_default=True)
+@click.option('-p', '--port', type=click.IntRange(0, 0xffff), default=8000, show_default=True, help="Port to listen on")
 @click.option('-d', '--data-dir', type=click.Path(file_okay=False), default="data_dir/", help="Path to directory to "
                                                                                               "store binary data of "
                                                                                               "snapshots")
@@ -134,7 +130,7 @@ def server(host, port, data_dir, url):
         run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir))
     else:
         # Scheme not supported
-        raise click.BadParameter('Unsupported Scheme for the queue url', param='url')
+        raise click.UsageError('Unsupported Scheme for the queue url')
 
 
 if __name__ == '__main__':
