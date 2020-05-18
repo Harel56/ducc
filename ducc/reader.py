@@ -7,12 +7,22 @@ from . import cortex_pb2
 
 class Reader:
     def __init__(self, filename):
-        msgs = messages(gzip.open(filename))
+        self.file = gzip.open(filename)
+        msgs = self._messages()
         self.user = protobuf_deserializer(cortex_pb2.User)(next(msgs))
         self.snapshots = map(protobuf_deserializer(cortex_pb2.Snapshot), msgs)
 
     def __iter__(self):
         return iter(self.snapshots)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.file.close()
+
+    def _messages(self):
+        return messages(self.file)
 
 
 def messages(f):
@@ -21,8 +31,9 @@ def messages(f):
             size = f.read(4)
             if len(size) != 4:
                 break
-            res = f.read(int.from_bytes(size, 'little', signed=False))
-            if len(res) != int.from_bytes(size, 'little', signed=False):
+            size = int.from_bytes(size, 'little', signed=False)
+            res = f.read()
+            if len(res) != size:
                 break
             yield res
     finally:

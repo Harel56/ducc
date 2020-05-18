@@ -5,7 +5,7 @@ import struct
 import threading
 from urllib.parse import urlparse
 from . import cortex_pb2
-from .utils import Listener, protocol, queue
+from .utils import Listener, protocol, queue, net
 
 
 class Context:
@@ -123,14 +123,15 @@ def server(host, port, data_dir, url):
     """Runs the server listening on the given host and port or defaults to localhost:8000 if not provided
     Publishes the data given to a message queue with url from the argument url.
     Example for url is 'rabbitmq://localhost:5672'."""
-    data_dir = pathlib.Path(data_dir)
-    o = urlparse(url, scheme="rabbitmq")
-    if o.scheme == 'rabbitmq':
-        data_dir.mkdir(exist_ok=True)
-        run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir))
-    else:
-        # Scheme not supported
-        raise click.UsageError('Unsupported Scheme for the queue url')
+    with net.SafetyNet():
+        data_dir = pathlib.Path(data_dir)
+        o = urlparse(url, scheme="rabbitmq")
+        if o.scheme == 'rabbitmq':
+            data_dir.mkdir(exist_ok=True)
+            run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir))
+        else:
+            # Scheme not supported
+            raise click.UsageError('Unsupported Scheme for the queue url')
 
 
 if __name__ == '__main__':

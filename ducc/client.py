@@ -1,7 +1,7 @@
 import click
 import itertools
 from .reader import Reader
-from .utils import Connection, protocol
+from .utils import Connection, protocol, net
 
 
 '''def upload_thought(address, user_id, thought):
@@ -26,13 +26,13 @@ def run_client(host, port, sample, limit=None):
     >>>sample = open('sample.mind')
     >>>run_client('localhost', 8000, sample)
     """
-    reader = Reader(sample)
-    for snapshot in itertools.islice(reader, limit):
-        with Connection.connect(host, port) as connection:
-            hello_msg, snapshot_msg = convert(reader.user, snapshot)
-            connection.send_message(hello_msg)
-            _ = protocol.Config.deserialize(connection.receive_message())
-            connection.send_message(snapshot_msg)
+    with Reader(sample) as reader:
+        for snapshot in itertools.islice(reader, limit):
+            with Connection.connect(host, port) as connection:
+                hello_msg, snapshot_msg = convert(reader.user, snapshot)
+                connection.send_message(hello_msg)
+                _ = protocol.Config.deserialize(connection.receive_message())
+                connection.send_message(snapshot_msg)
 
 
 def convert(user, snapshot):
@@ -57,7 +57,8 @@ def client(host, port, limit, file):
     Runs the client connecting to server at address given by options '--host', '--port';
     reading data sample from given file argument.
     """
-    run_client(host, port, file, limit)
+    with net.SafetyNet():
+        run_client(host, port, file, limit)
 
 
 if __name__ == '__main__':

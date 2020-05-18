@@ -3,7 +3,7 @@ import datetime as dt
 import json
 import pymongo
 from urllib.parse import urlparse
-from .utils import queue
+from .utils import queue, net
 
 
 class Saver:
@@ -67,19 +67,21 @@ def cli():
 @click.argument('topic')
 @click.argument('data', type=click.File())
 def save(database, topic, data):
-    Saver(database).save(topic, data.read())
+    with net.SafetyNet():
+        Saver(database).save(topic, data.read())
 
 
 @cli.command()
 @click.argument('database')
 @click.argument('queue')
 def run_saver(database, queue):
-    o = urlparse(queue, scheme="rabbitmq")
-    if o.scheme == 'rabbitmq':
-        run_server_pika(o.hostname, o.port, database)
-    else:
-        # Scheme not supported
-        raise click.UsageError('Unsupported Scheme for the queue url')
+    with net.SafetyNet():
+        o = urlparse(queue, scheme="rabbitmq")
+        if o.scheme == 'rabbitmq':
+            run_server_pika(o.hostname, o.port, database)
+        else:
+            # Scheme not supported
+            raise click.UsageError('Unsupported Scheme for the queue url')
 
 
 if __name__ == "__main__":
