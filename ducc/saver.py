@@ -1,6 +1,7 @@
 import click
 import datetime as dt
 import json
+import logging
 import pymongo
 from urllib.parse import urlparse
 from .utils import queue, net
@@ -38,23 +39,17 @@ class Saver:
             pass  # Unsupported scheme / database
 
 
-def run_server_pika(host: str, port: int, database: str):
+def run_server_pika(host: str, port: int, database: str, log=True):
     saver = Saver(database)
 
     def callback(ch, method, properties, body):
+        if log:
+            logging.info("Received message from queue")
         saver.save(method.routing_key, body)
+        if log:
+            logging.info("Saved message to database")
 
     queue.consume(host, port, 'topic_logs', callback, 'topic', routing_key='#')
-
-
-'''def pika_connection_establish(host, port):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
-    channel = connection.channel()
-    channel.exchange_declare(exchange='topic_logs', exchange_type='topic')
-    result = channel.queue_declare(queue='', exclusive=True)
-    queue_name = result.method.queue
-    channel.queue_bind(exchange='topic_logs', queue=queue_name, routing_key='#')
-    return channel, queue_name'''
 
 
 @click.group()
@@ -72,13 +67,14 @@ def save(database, topic, data):
 
 
 @cli.command()
+@click.option('--log/--no-log', default=True)
 @click.argument('database')
 @click.argument('queue')
-def run_saver(database, queue):
+def run_saver(database, queue, log):
     with net.SafetyNet():
         o = urlparse(queue, scheme="rabbitmq")
         if o.scheme == 'rabbitmq':
-            run_server_pika(o.hostname, o.port, database)
+            run_server_pika(o.hostname, o.port, database, log)
         else:
             # Scheme not supported
             raise click.UsageError('Unsupported Scheme for the queue url')

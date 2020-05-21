@@ -1,5 +1,6 @@
 import click
 import json
+import logging
 import pathlib
 import struct
 import threading
@@ -21,15 +22,33 @@ class Context:
             f.write(data)
 
 
-def handle_connection(connection, callback):
+def handle_connection(connection, callback, log=True):
     with connection:
-        hello = protocol.Hello.deserialize(connection.receive_message())
-        config = protocol.Config('pose', 'color_image', 'depth_image', 'feelings')
-        connection.send_message(config.serialize())
-        #snapshot = Snapshot.deserialize(connection.receive_message())
-        snapshot = cortex_pb2.Snapshot()
-        snapshot.ParseFromString(connection.receive_message())
-    callback((hello, snapshot))
+        if log:
+            logging.info("Received connection on " + str(connection))
+        try:
+            message = read_message(connection)
+        except Exception as exc:
+            if log:
+                logging.warning(f"Failed to read message from {connection}: {exc}")
+            return 1
+    try:
+        callback(message)
+    except Exception as exc:
+        if log:
+            logging.warning("Failed publishing snapshot:" + str(exc))
+        return 1
+    if log:
+        logging.info("Published snapshot successfully")
+
+
+def read_message(connection):
+    hello = protocol.Hello.deserialize(connection.receive_message())
+    config = protocol.Config('pose', 'color_image', 'depth_image', 'feelings')
+    connection.send_message(config.serialize())
+    snapshot = cortex_pb2.Snapshot()
+    snapshot.ParseFromString(connection.receive_message())
+    return hello, snapshot
 
 
 def run_server(host, port, publish):

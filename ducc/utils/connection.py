@@ -7,7 +7,7 @@ class Connection:
         self.socket = socket
 
     def __repr__(self):
-        return '<Connection from %s:%d to %s:%d>' % (*self.socket.getsockname(), *self.socket.getpeername())
+        return '<Connection from %s:%d to %s:%d>' % (*self.local_name(), *self.peer())
 
     def __enter__(self):
         return self
@@ -41,3 +41,21 @@ class Connection:
 
     def close(self):
         self.socket.close()
+
+    def local_name(self):
+        """
+        local_name() -> address info
+
+        Return the address of the local endpoint.  For IP sockets, the address
+        info is a pair (hostaddr, port).
+        """
+        return self.socket.getsockname()
+
+    def peer(self):
+        """
+        peer() -> address info
+
+        Return the address of the remote endpoint.  For IP sockets, the address
+        info is a pair (hostaddr, port).
+        """
+        return self.socket.getpeername()

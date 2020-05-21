@@ -1,4 +1,5 @@
 import click
+import logging
 from urllib.parse import urlparse
 from .api import run_parser, parsers
 from ..utils import queue, net
@@ -22,9 +23,10 @@ def parse(name, data):
 
 
 @cli.command('run-parser')
+@click.option('--log/--no-log', default=True)
 @click.argument('name', type=click.Choice(tuple(parsers.keys())))
 @click.argument('url')
-def cli_run_parser(name, url):
+def cli_run_parser(name, url, log):
     """
     Accepts a parser name and url for the message queue.
     Runs the parser as a service, working with the message queue indefinitely.
@@ -33,7 +35,11 @@ def cli_run_parser(name, url):
         o = urlparse(url, scheme="rabbitmq")
         if o.scheme == 'rabbitmq':
             def callback(ch, method, properties, body):
-                return queue.publish(o.hostname, o.port, 'topic_logs', run_parser(name, body), 'topic', name)
+                if log:
+                    logging.info("Received message from queue")
+                queue.publish(o.hostname, o.port, 'topic_logs', run_parser(name, body), 'topic', name)
+                if log:
+                    logging.info("Sent message to queue")
             queue.consume(o.hostname, o.port, 'root', callback, 'fanout')
         else:
             # Scheme not supported

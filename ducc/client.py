@@ -4,13 +4,6 @@ from .reader import Reader
 from .utils import Connection, protocol, net
 
 
-'''def upload_thought(address, user_id, thought):
-    th = Thought(user_id, datetime.today(), thought)
-    with Connection.connect(*address) as conn:
-        conn.send(th.serialize())
-'''
-
-
 def upload_sample(host, port, path, limit=None):
     """same as run_client"""
     run_client(host, port, path, limit)
