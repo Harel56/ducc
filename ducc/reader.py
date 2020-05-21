@@ -32,7 +32,7 @@ def messages(f):
             if len(size) != 4:
                 break
             size = int.from_bytes(size, 'little', signed=False)
-            res = f.read()
+            res = f.read(size)
             if len(res) != size:
                 break
             yield res
