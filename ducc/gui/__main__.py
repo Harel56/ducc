@@ -15,4 +15,4 @@ def run_server(host, port, database):
     start(host, port, database)
 
 
-cli()
+cli(prog_name="python -m ducc.gui")

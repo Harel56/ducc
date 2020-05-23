@@ -46,7 +46,7 @@ def color(userID: int, snapshotID):
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/depth-image')
 def depth(userID: int, snapshotID):
-    return client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID}, {'depth': 1})['depth']
+    return str(client.db.snapshots.find_one({'_id': ObjectId(snapshotID), 'user_id': userID}, {'depth': 1})['depth'])
 
 
 @app.route('/users/<int:userID>/snapshots/<snapshotID>/feelings')

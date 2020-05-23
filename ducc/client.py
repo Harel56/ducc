@@ -55,4 +55,4 @@ def client(host, port, limit, file):
 
 
 if __name__ == '__main__':
-    cli()
+    cli(prog_name="python -m ducc.client")

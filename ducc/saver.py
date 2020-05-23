@@ -81,4 +81,4 @@ def run_saver(database, queue, log):
 
 
 if __name__ == "__main__":
-    cli()
+    cli(prog_name="python -m ducc.saver")

@@ -51,7 +51,7 @@ def read_message(connection):
     return hello, snapshot
 
 
-def run_server(host, port, publish):
+def run_server(host, port, publish, log=True):
     """
     Listen on host:port and pass received messages to publish
 
@@ -64,7 +64,7 @@ def run_server(host, port, publish):
     with Listener(port, host) as listener:
         while True:
             client = listener.accept()
-            threading.Thread(target=handle_connection, args=(client, publish)).start()
+            threading.Thread(target=handle_connection, args=(client, publish, log)).start()
 
 
 def publisher(publish):
@@ -137,8 +137,9 @@ def cli():
 @click.option('-d', '--data-dir', type=click.Path(file_okay=False), default="data_dir/", help="Path to directory to "
                                                                                               "store binary data of "
                                                                                               "snapshots")
+@click.option('--log/--no-log', default=True)
 @click.argument('url')
-def server(host, port, data_dir, url):
+def server(host, port, data_dir, log, url):
     """Runs the server listening on the given host and port or defaults to localhost:8000 if not provided
     Publishes the data given to a message queue with url from the argument url.
     Example for url is 'rabbitmq://localhost:5672'."""
@@ -147,11 +148,11 @@ def server(host, port, data_dir, url):
         o = urlparse(url, scheme="rabbitmq")
         if o.scheme == 'rabbitmq':
             data_dir.mkdir(exist_ok=True)
-            run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir))
+            run_server(host, port, publish_to_queue(o.hostname, o.port, data_dir), log)
         else:
             # Scheme not supported
             raise click.UsageError('Unsupported Scheme for the queue url')
 
 
 if __name__ == '__main__':
-    cli()
+    cli(prog_name="python -m ducc.server")
