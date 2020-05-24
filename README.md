@@ -1,13 +1,17 @@
 # ducc
-[![GitHub release](https://img.shields.io/github/release/Haresl56/ducc.svg)](https://github.com/Harel56/ducc/releases/latest)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Harel56/ducc)](https://github.com/Harel56/ducc/releases/latest)
 [![Build Status](https://travis-ci.com/Harel56/ducc.svg?branch=master)](https://travis-ci.com/Harel56/ducc)  
+[![GitHub followers](https://img.shields.io/github/followers/Harel56?label=Follow&style=social)](https://github.com/Harel56/followers)
+[![GitHub forks](https://img.shields.io/github/forks/Harel56/ducc?style=social)](https://github.com/Harel56/ducc/fork)
+![GitHub stars](https://img.shields.io/github/stars/Harel56/ducc?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/Harel56/ducc?style=social)  
 Final project for course advanced system design  
 
 ## Download
 
 ### From Source
 
-![GitHub repo size](https://img.shields.io/github/repo-size/Harel56/ducc.svg)  
+![GitHub repo size](https://img.shields.io/github/repo-size/Harel56/ducc)  
 
 1. Run `git clone https://github.com/Harel56/ducc.git` (or
    clone [your own fork](https://github.com/Harel56/ducc/fork)
@@ -16,7 +20,7 @@ Final project for course advanced system design
 
 ### Packaged Distributions
 
-[![GitHub release](https://img.shields.io/github/downloads/Harel56/ducc/total.svg)](https://github.com/Harel56/ducc/releases/latest)
+[![GitHub All Releases](https://img.shields.io/github/downloads/Harel56/ducc/total)](https://github.com/Harel56/ducc/releases/latest)
 
 1. Download `ducc-<version>.zip` (or
    `.tgz`) attached to
