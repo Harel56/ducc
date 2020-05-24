@@ -23,7 +23,7 @@ Final project for course advanced system design
 [![GitHub All Releases](https://img.shields.io/github/downloads/Harel56/ducc/total)](https://github.com/Harel56/ducc/releases/latest)
 
 1. Download `ducc-<version>.zip` (or
-   `.tgz`) attached to
+   `.tar.gz`) attached to
    [latest release](https://github.com/Harel56/ducc/releases/latest)
 3. Unpack and `cd` into the unpacked folder
 
