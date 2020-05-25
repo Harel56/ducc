@@ -35,7 +35,7 @@ https://docs.google.com/document/d/1AO_RGoPiMQKQuKFt8E-IwjKXxxt9vnobH-0hfFAxGaQ
 1. Make Sure you have [Docker](https://www.docker.com/) installed
 2. Download the project using one of the options described above
 3. Go into the project directory with `cd`
-4. Deploy the server and it's componenents with docker
+4. Deploy the server and its componenents with docker
    using the script at `scripts/run-pipeline.sh` (May take a while)
 5. You can upload a sample to the server by running
    `python -m ducc.client upload-sample <sample>` (A sample example
