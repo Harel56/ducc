@@ -34,16 +34,16 @@ https://docs.google.com/document/d/1AO_RGoPiMQKQuKFt8E-IwjKXxxt9vnobH-0hfFAxGaQ
 ## Quick Deployment
 1. Make Sure you have [Docker](https://www.docker.com/) installed
 2. Download the project using one of the options described above
-3. Go into the projec directory with `cd`
-4. deploy the server and it's componenents with docker
+3. Go into the project directory with `cd`
+4. Deploy the server and it's componenents with docker
    using the script at `scripts/run-pipeline.sh` (May take a while)
 5. You can upload a sample to the server by running
    `python -m ducc.client upload-sample <sample>` (A sample example
    can be downloaded from [here](https://storage.googleapis.com/advanced-system-design/sample.mind.gz))
-6. You can access the gui by browsing http://localhost:8080
+6. You can access the GUI by browsing http://localhost:8080
 
 ## Background
 This project was made by me (Harel Etgar)  
-Made for course Advanced System Design, Academic year 2019-2020 semester A, [Tel Aviv University](http://www.tau.ac.il/)  
+Made for the course "Advanced System Design", Academic year 2019-2020 semester A, [Tel Aviv University](http://www.tau.ac.il/)  
 Course Instructor: [Dan Gittik](https://www.dan-gittik.com/)  
-Made mainly during the covid-19 outbreak of 2020
+Prepared mainly during the COVID-19 outbreak of 2020
