@@ -21,7 +21,7 @@ packaging==19.2
 pika==1.1.0
 Pillow==7.0.0
 pluggy==0.13.0
-protobuf==3.11.2
+protobuf==3.18.3
 py==1.8.0
 pycodestyle==2.5.0
 pyflakes==2.1.1
